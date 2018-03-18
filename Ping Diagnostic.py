@@ -1,31 +1,44 @@
 import subprocess
 import re
+import time
 import tkinter as tk
+import matplotlib.pyplot as plt
 
 
-def get_ping():
+def get_periodic_ping():
     global address
-    global pingTime
-    output = subprocess.check_output('ping %s -n 1' % (address,), shell=True)
-    response = re.search("Average = (.*?)ms", str(output))
-    time = int(response.group(1))
-    pingTime.set(str(time))
+    global log
+    output = subprocess.check_output('ping %s -n 3' % (address,), shell=True)
+    response = int(re.search("Average = (.*?)ms", str(output)).group(1))
+    log.append(response)
+
+
+def stop():
+    global running
+    running = False
+    root.destroy()
+
+
+def testing():
+    global running
+    running = True
+    if running:
+        get_periodic_ping()
+        root.after(10000, testing)
 
 
 address = "google.co.uk"
+log = []
+running = True
 
 root = tk.Tk()
-root.geometry("300x200+350+350")
+root.title("PING TESTER")
+root.geometry("200x100")
 
-pingTime = tk.StringVar()
-
-pingButton = tk.Button(root,
-                       text='PING',
-                       command=get_ping)
-pingButton.pack()
-
-pingLabel = tk.Label(root,
-                     textvariable=pingTime)
-pingLabel.pack()
+startButton = tk.Button(root, text='START', command=testing).pack()
+stopButton = tk.Button(root, text='STOP', command=stop).pack()
 
 root.mainloop()
+
+plt.plot(log)
+plt.show()
