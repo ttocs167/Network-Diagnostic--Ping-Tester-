@@ -3,29 +3,29 @@ import re
 import tkinter as tk
 
 
-def get_ping(address):
+def get_ping():
+    global address
+    global pingTime
     output = subprocess.check_output('ping %s -n 1' % (address,), shell=True)
     response = re.search("Average = (.*?)ms", str(output))
     time = int(response.group(1))
-    return time
+    pingTime.set(str(time))
 
 
-server = "google.co.uk"
+address = "google.co.uk"
 
 root = tk.Tk()
+root.geometry("300x200+350+350")
 
-frame = tk.Frame(root)
-frame.pack()
+pingTime = tk.StringVar()
 
-button = tk.Button(frame,
-                   text="QUIT",
-                   fg="red",
-                   command=quit)
-button.pack(side=tk.LEFT)
+pingButton = tk.Button(root,
+                       text='PING',
+                       command=get_ping)
+pingButton.pack()
 
-slogan = tk.Button(frame,
-                   text="PING",
-                   command=get_ping(server))
-slogan.pack(side=tk.LEFT)
+pingLabel = tk.Label(root,
+                     textvariable=pingTime)
+pingLabel.pack()
 
 root.mainloop()
